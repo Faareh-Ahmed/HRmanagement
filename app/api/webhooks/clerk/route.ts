@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 
-import { createUser } from "@/lib/actions/user.actions";
+import { createUser, updateUser, deleteUser } from "@/lib/actions/user.actions";
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
@@ -103,4 +103,79 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Error creating user in database' }, { status: 500 });
     }
 }
+
+
+// USER UPDATED
+  if (eventType === 'user.updated') {
+    const { id, image_url, first_name, last_name, username } = evt.data;
+
+     if (!id) {
+        console.error("[Webhook Handler] Error: Missing id for user.updated event.", evt.data);
+        return NextResponse.json({ message: 'Error: Missing required user data' }, { status: 400 });
+    }
+
+    const userToUpdate = {
+      username: username || '',
+      firstName: first_name ?? '',
+      lastName: last_name ?? '',
+      photo: image_url || '',
+    };
+
+    console.log(`[Webhook Handler] Preparing to update user ${id} with data:`, userToUpdate);
+
+    try {
+      const updatedUser = await updateUser(id, userToUpdate);
+       if (!updatedUser) {
+           console.warn(`[Webhook Handler] User with clerkId ${id} not found for update.`);
+           return NextResponse.json({ message: 'User not found for update, webhook acknowledged.' }, { status: 200 });
+       }
+      console.log('[Webhook Handler] User updated successfully in DB:', updatedUser._id);
+      return NextResponse.json({ message: 'User updated successfully', user: updatedUser }, { status: 200 });
+    } catch (error) {
+      console.error(`[Webhook Handler] Error calling updateUser action for ${id}:`, error);
+      return NextResponse.json({ message: 'Error updating user in database' }, { status: 500 });
+    }
+  }
+
+  // USER DELETED
+  if (eventType === 'user.deleted') {
+    // Clerk's event payload for deleted might differ slightly, check their docs.
+    // Often it includes { id: string, deleted: boolean }
+    // We primarily need the 'id'.
+    const { id } = evt.data;
+
+    // Important: Check if ID exists in the deleted event payload
+    if (!id) {
+        console.error("[Webhook Handler] Error: Missing id for user.deleted event.", evt.data);
+        // If ID is missing, we can't delete. Return 400.
+        return NextResponse.json({ message: 'Error: Missing user ID for deletion' }, { status: 400 });
+    }
+
+
+    console.log(`[Webhook Handler] Preparing to delete user with Clerk ID: ${id}`);
+
+    try {
+      const deletedUser = await deleteUser(id);
+
+      if (!deletedUser) {
+           console.warn(`[Webhook Handler] User with clerkId ${id} not found for deletion (already deleted or never existed in DB?).`);
+           return NextResponse.json({ message: 'User not found for deletion, webhook acknowledged.' }, { status: 200 });
+      }
+
+      console.log('[Webhook Handler] User deleted successfully from DB:', deletedUser._id);
+      return NextResponse.json({ message: 'User deleted successfully', user: deletedUser }, { status: 200 });
+
+    } catch (error) {
+      console.error(`[Webhook Handler] Error calling deleteUser action for ${id}:`, error);
+      return NextResponse.json({ message: 'Error deleting user from database' }, { status: 500 });
+    }
+  }
+
+  // --- Fallback for Unhandled Events ---
+  console.log(`[Webhook Handler] Unhandled event type: ${eventType}. ID: ${evt.data.id ?? 'N/A'}. Acknowledging receipt.`);
+  return NextResponse.json({ message: 'Webhook received but event type not handled' }, { status: 200 });
+
+
 }
+
+
