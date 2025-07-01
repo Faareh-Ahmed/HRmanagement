@@ -1,26 +1,102 @@
-@import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* --- Main Brand Colors --- */
+    --color-brand-dark: #001B12;
+    --color-brand-light: #F9F9F9;
+
+    /* --- Primary Grayscale Palette --- */
+    --color-gray-100: #FCFCFC;
+    --color-gray-200: #F6F6F6;
+    --color-gray-300: #F2F2F2;
+    --color-gray-400: #EBEBEB;
+    --color-gray-500: #C9C9C9;
+    --color-gray-600: #ACACAC;
+    --color-gray-700: #818181;
+    --color-gray-800: #6D6D6D;
+    --color-gray-900: #4D4D4D;
+    --color-gray-950: #040404;
+
+    /* --- Secondary & Accent Colors --- */
+    --color-accent-orange: #FC6F29;
+    --color-accent-orange-light: #FEF4EB;
+
+    --color-accent-gold: #E28100;
+    --color-accent-gold-light: #FEF6D2;
+
+    --color-accent-cyan: #00A9E0;
+    --color-accent-cyan-light: #E9F8FF;
+
+    --color-accent-blue: #0050F8;
+    --color-accent-blue-dark: #2163D5;
+    --color-accent-blue-light: #E3EFFF;
+    --color-accent-blue-light-alt: #EFF8FF;
+
+    --color-accent-green: #34BE6E;
+    --color-accent-green-light: #ECFEF2;
+
+    --color-accent-purple: #704AC8;
+    --color-accent-purple-light: #F0E7FF;
+
+    --color-accent-navy: #173C77;
+    --color-accent-navy-light: #EAF2FF;
+
+    --color-accent-maroon: #850018;
+    --color-accent-maroon-light: #FCE9EC;
+
+    --color-accent-teal: #1D7575;
+    --color-accent-teal-light: #EAFEFF;
+
+
+    /* --- Semantic Theme Variables (for consistent theming) --- */
+    --background: var(--color-brand-light);
+    --foreground: var(--color-brand-light);
+
+    --card: var(--color-gray-100);
+    --card-foreground: var(--color-brand-dark);
+    
+    --primary: var(--color-accent-purple);
+    --primary-foreground: var(--color-brand-light);
+
+    --secondary: var(--color-accent-orange);
+    --secondary-foreground: var(--color-brand-light);
+    
+    --muted: var(--color-gray-200);
+    --muted-foreground: var(--color-gray-700);
+
+    --accent: var(--color-accent-blue);
+    --accent-foreground: var(--color-brand-light);
+
+    --destructive: var(--color-accent-maroon);
+    
+    --border: var(--color-gray-400);
+    --input: var(--color-gray-300);
+    --ring: var(--color-accent-purple-light);
+  }
+
+  .dark {
+    --background: var(--color-brand-dark);
+}
+}
+
+/* 4. Apply base styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 5. Keep all your other custom component styles below */
+
+.auth {
+  @apply flex flex-col items-center justify-center h-screen;
 }
+
