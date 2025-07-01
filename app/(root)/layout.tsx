@@ -1,7 +1,7 @@
-// app/(main)/layout.tsx (NEW FILE)
 
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
 import React from 'react';
+import '../globals.css';
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
